@@ -37,7 +37,8 @@ cgm-remote-monitor-vX.Y.Z.zip
 ├── docker-compose.yml       # Production docker-compose
 ├── cgm-remote-monitor.tar  # Docker image export
 ├── ENVIRONMENT.md          # Environment variable docs
-└── .env.example            # Environment template
+├── .env.example            # Environment template
+└── README.md               # Deployment instructions
 ```
 
 ## Prerequisites

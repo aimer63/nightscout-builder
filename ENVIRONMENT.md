@@ -16,6 +16,8 @@ Minimum required variables:
 
 ## Database
 
+Uses MongoDB 7.0 (container image `mongo:7.0`).
+
 | Variable | Default | Description |
 | -------- | ------- | ----------- |
 | `MONGO_CONNECTION` | `mongodb://mongo:27017/nightscout` | MongoDB connection URI |

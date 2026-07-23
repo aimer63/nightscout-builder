@@ -106,7 +106,7 @@ The `nightscout-builder/docker-compose.yml` template:
 - Removes Traefik (using nginx instead)
 - Exposes port directly (configurable via `.env`)
 - Externalizes all configuration to environment variables
-- Uses MongoDB 8.0 (instead of 4.4 in official)
+- Uses MongoDB 7.0 (instead of 4.4 in official)
 - Includes health checks for MongoDB
 
 ### Key Differences from Official
@@ -116,7 +116,7 @@ The `nightscout-builder/docker-compose.yml` template:
 | Reverse Proxy | Traefik | Nginx (external) |
 | Port Exposure | 80/443 via Traefik | 1337 direct (or custom) |
 | TLS | Traefik manages | Nginx manages |
-| MongoDB | 4.4 | 8.0 |
+| MongoDB | 4.4 | 7.0 |
 
 ## Configuration Management
 
