@@ -72,6 +72,7 @@ SRC_DOCKER_COMPOSE = BUILDER_DIR / "docker-compose.yml"
 SRC_ENV_EXAMPLE = BUILDER_DIR / ".env.example"
 SRC_README_ENV = BUILDER_DIR / "ENVIRONMENT.md"
 SRC_RELEASE_README = BUILDER_DIR / "README-release.md"
+SRC_NGINX_TEMPLATE = BUILDER_DIR / "nginx-template.conf"
 
 # Build artifacts
 DOCKER_IMAGE_TAG = "cgm-remote-monitor:local"
@@ -270,6 +271,13 @@ def create_archive(version):
         else:
             print(f"  ⚠️  Missing: README-release.md")
 
+        # Add nginx template
+        if SRC_NGINX_TEMPLATE.exists():
+            zf.write(SRC_NGINX_TEMPLATE, "nginx-template.conf")
+            print("  📄 Added: nginx-template.conf")
+        else:
+            print(f"  ⚠️  Missing: nginx-template.conf")
+
         # Add Docker image tarball
         if DOCKER_IMAGE_TAR.exists():
             zf.write(DOCKER_IMAGE_TAR, "cgm-remote-monitor.tar")
@@ -300,6 +308,7 @@ def print_summary(version, archive_path):
     print("  - .env.example            Environment variable template")
     print("  - ENVIRONMENT.md          Environment documentation")
     print("  - README.md               Deployment instructions")
+    print("  - nginx-template.conf     Nginx reverse proxy template")
     print("\n🚀 DEPLOYMENT:")
     print("  1. Copy archive to server:")
     print(f"     scp {archive_path} user@server:/opt/nightscout/")

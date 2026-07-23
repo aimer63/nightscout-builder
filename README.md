@@ -23,10 +23,10 @@ nightscout-builder/
 │   └── docker-hosting.md # High-level plan
 └── released/             # Build output directory
     └── cgm-remote-monitor-v15.0.7.zip
-
-# Assumes cgm-remote-monitor repo at:
-~/devel/cgm-remote-monitor/
 ```
+
+**Note:** The build script expects to find the `cgm-remote-monitor` repository
+at `../cgm-remote-monitor/` (sibling directory). See build.py to customize this path.
 
 ## Build Output
 
@@ -38,7 +38,8 @@ cgm-remote-monitor-vX.Y.Z.zip
 ├── cgm-remote-monitor.tar  # Docker image export
 ├── ENVIRONMENT.md          # Environment variable docs
 ├── .env.example            # Environment template
-└── README.md               # Deployment instructions
+├── README.md               # Deployment instructions
+└── nginx-template.conf     # Nginx reverse proxy template
 ```
 
 ## Prerequisites
@@ -48,26 +49,50 @@ cgm-remote-monitor-vX.Y.Z.zip
 - Git
 - Sufficient disk space (Docker image ~500MB)
 
+### Required Repositories
+
+This build system requires two repositories:
+
+1. **cgm-remote-monitor** - The upstream Nightscout source code
+   - Clone from: <https://github.com/nightscout/cgm-remote-monitor.git>
+   - Build script looks for it at: `../cgm-remote-monitor/` (relative to this repo)
+
+2. **nightscout-builder** (this repository) - Build scripts and templates
+
 ## Usage
 
-### 1. Sync with Upstream
+### 1. Set Up Upstream Repository
 
 ```bash
-# Add upstream remote (one-time setup)
-git remote add upstream https://github.com/nightscout/cgm-remote-monitor.git
+# Clone the upstream repository (one-time)
+git clone https://github.com/nightscout/cgm-remote-monitor.git
 
-# Fetch latest releases
+# Enter the upstream repository
+cd cgm-remote-monitor
+
+# Add upstream remote to track official releases
+git remote add upstream https://github.com/nightscout/cgm-remote-monitor.git
 git fetch upstream --tags
+```
+
+### 2. Select Version
+
+```bash
+# In cgm-remote-monitor repository
+cd cgm-remote-monitor
 
 # See available versions
 git tag -l | grep -E '^[0-9]+\.[0-9]+' | sort -V
-```
 
-### 2. Build Release
-
-```bash
 # Checkout desired version
 git checkout tags/15.0.7
+```
+
+### 3. Build Release
+
+```bash
+# In nightscout-builder repository
+cd nightscout-builder
 
 # Run build script
 python3 build.py
@@ -75,10 +100,11 @@ python3 build.py
 
 The script will:
 
-1. Extract version from git tag
-2. Build Docker image from official Dockerfile
-3. Export image as tarball
-4. Package into zip file in `nightscout-builder/released/`
+1. Read the upstream source from `cgm-remote-monitor/` directory
+2. Extract version from git tag
+3. Build Docker image from official Dockerfile
+4. Export image as tarball
+5. Package into zip file in `released/`
 
 ### 3. Deploy
 
@@ -100,35 +126,17 @@ docker compose up -d
 
 ## Nginx Reverse Proxy
 
-Since this setup exposes Nightscout directly on a port, use nginx as reverse proxy:
+Since this setup exposes Nightscout directly on a port, use nginx as reverse proxy
+for HTTPS termination.
 
-```nginx
-server {
-    listen 443 ssl http2;
-    server_name nightscout.example.com;
+The release includes `nginx-template.conf` - a production-tested configuration
+with SSL, security headers, and proxy settings. It defaults to `localhost:1337`.
 
-    ssl_certificate /path/to/cert.pem;
-    ssl_certificate_key /path/to/key.pem;
+**To use:**
 
-    location / {
-        proxy_pass http://localhost:1337;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-
-server {
-    listen 80;
-    server_name nightscout.example.com;
-    return 301 https://$server_name$request_uri;
-}
-```
+1. Copy `nginx-template.conf` to your nginx config directory
+2. Customize: `server_name`, SSL certificate paths, and upstream URL if needed
+3. Reload nginx: `sudo nginx -s reload`
 
 ## Update Process
 

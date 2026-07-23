@@ -55,18 +55,18 @@ git fetch upstream
 When new version is released:
 
 ```bash
-# In cgm-remote-monitor repo, fetch latest from upstream
-cd ~/devel/cgm-remote-monitor
+# In cgm-remote-monitor repository
+cd cgm-remote-monitor
 git fetch upstream --tags
 
 # Checkout new release tag
 git checkout tags/15.0.7  # Replace with latest tag
 
 # Build release artifacts from nightscout-builder
-cd ~/devel/nightscout-builder
+cd ../nightscout-builder
 python3 build.py
 
-# Result: nightscout-builder/released/cgm-remote-monitor-v15.0.7.zip
+# Result: released/cgm-remote-monitor-v15.0.7.zip
 ```
 
 ## Build System
@@ -171,15 +171,15 @@ server {
 
 ```bash
 # 1. Clone upstream repo
-git clone https://github.com/nightscout/cgm-remote-monitor.git ~/devel/cgm-remote-monitor
-cd ~/devel/cgm-remote-monitor
+git clone https://github.com/nightscout/cgm-remote-monitor.git
+cd cgm-remote-monitor
 git remote add upstream https://github.com/nightscout/cgm-remote-monitor.git
 
 # 2. Checkout desired version
 git checkout tags/15.0.7
 
 # 3. Build release from nightscout-builder
-cd ~/devel/nightscout-builder
+cd ../nightscout-builder
 python3 build.py
 
 # 4. Copy release to deployment location
@@ -187,11 +187,11 @@ cp released/cgm-remote-monitor-v15.0.7.zip /opt/nightscout/
 cd /opt/nightscout
 unzip cgm-remote-monitor-v15.0.7.zip
 
-# 4. Configure
+# 5. Configure
 cp .env.example .env
 nano .env  # Edit with your settings
 
-# 5. Deploy
+# 6. Deploy
 docker load < cgm-remote-monitor.tar
 docker compose up -d
 ```
@@ -199,21 +199,21 @@ docker compose up -d
 ### Update to New Version
 
 ```bash
-# 1. In cgm-remote-monitor repo, fetch upstream tags
-cd ~/devel/cgm-remote-monitor
+# 1. In cgm-remote-monitor repository, fetch upstream tags
+cd cgm-remote-monitor
 git fetch upstream --tags
 
 # 2. Checkout new version
 git checkout tags/15.0.8  # Latest version
 
 # 3. Rebuild from nightscout-builder
-cd ~/devel/nightscout-builder
+cd ../nightscout-builder
 python3 build.py
 
 # 4. Deploy update
 cd /opt/nightscout
 docker compose down
-cp ~/devel/nightscout-builder/released/cgm-remote-monitor-v15.0.8.zip .
+cp /path/to/nightscout-builder/released/cgm-remote-monitor-v15.0.8.zip .
 rm -f cgm-remote-monitor-v15.0.7.zip  # Cleanup old version
 unzip -o cgm-remote-monitor-v15.0.8.zip
 docker load < cgm-remote-monitor.tar
