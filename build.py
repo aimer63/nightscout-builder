@@ -114,7 +114,7 @@ def run(cmd, cwd=None, check=True, capture=False):
         return MockResult(process.returncode)
 
 
-def check_prerequisites(force=False):
+def check_prerequisites():
     """Verify Docker is available and git state is clean."""
     print("📋 Checking prerequisites...")
 
@@ -130,19 +130,11 @@ def check_prerequisites(force=False):
         ["git", "status", "--porcelain"], cwd=REPO_ROOT, check=False, capture=True
     )
     if result.stdout.strip():
-        if force:
-            print(
-                "⚠️  Warning: Working directory is not clean (continuing due to --force)"
-            )
-            print("Uncommitted changes:")
-            print(result.stdout)
-        else:
-            print("❌ Error: Working directory is not clean")
-            print("Uncommitted changes:")
-            print(result.stdout)
-            print("\nPlease commit or stash changes before building.")
-            print("Or use --force to build anyway (not recommended for production).")
-            sys.exit(1)
+        print("❌ Error: Working directory is not clean")
+        print("Uncommitted changes:")
+        print(result.stdout)
+        print("\nPlease commit or stash changes before building.")
+        sys.exit(1)
 
     # Check we're on a tag
     result = run(
@@ -323,9 +315,6 @@ Examples:
   # Build with verbose output
   python3 build.py --verbose
 
-  # Build even with uncommitted changes (testing only)
-  python3 build.py --force
-
 The cgm-remote-monitor repo must be on a clean git checkout at a version tag.
         """,
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -333,18 +322,12 @@ The cgm-remote-monitor repo must be on a clean git checkout at a version tag.
     parser.add_argument(
         "--verbose", "-v", action="store_true", help="Enable verbose output"
     )
-    parser.add_argument(
-        "--force",
-        "-f",
-        action="store_true",
-        help="Force build even with uncommitted changes (not recommended for production)",
-    )
     args = parser.parse_args()
 
     print("🚀 CGM-Remote-Monitor Release Builder\n")
 
     # Run build steps
-    check_prerequisites(force=args.force)
+    check_prerequisites()
     version = extract_version()
     print(f"📌 Building version: {version}\n")
 
